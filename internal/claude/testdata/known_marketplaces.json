@@ -1,0 +1,20 @@
+{
+  "local-dev": {
+    "source": {"source": "directory", "path": "/srv/work/local-marketplace"},
+    "installLocation": "/srv/.claude/marketplace/local-dev",
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "autoUpdate": true
+  },
+  "remote-marketplace": {
+    "source": {"source": "github", "repo": "org/remote-marketplace"},
+    "installLocation": "/srv/.claude/marketplace/remote-marketplace",
+    "lastUpdated": "2026-03-19T08:30:00.000Z",
+    "autoUpdate": false
+  },
+  "url-marketplace": {
+    "source": {"source": "url", "url": "https://example.com/plugins.git"},
+    "installLocation": "/srv/.claude/marketplace/url-marketplace",
+    "lastUpdated": "2026-03-21T12:00:00.000Z",
+    "autoUpdate": false
+  }
+}

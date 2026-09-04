@@ -1,0 +1,13 @@
+# Template HOME for the E2E suite. `make e2e-login` points a real `claude` at
+# this directory, so it receives OAuth credentials, an account id and session
+# history. Only the fixtures the suite needs are tracked; everything else,
+# including anything a future Claude Code version writes here, stays out.
+*
+!.gitignore
+!settings.json
+!plugins/
+plugins/*
+!plugins/installed_plugins.json
+!plugins/known_marketplaces.json
+!plugins/cache/
+!plugins/cache/.keep

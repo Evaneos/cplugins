@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "plugins": {
+    "hello-world@my-marketplace": [
+      {
+        "scope": "user",
+        "projectPath": "",
+        "installPath": "/srv/.claude/plugins/cache/my-marketplace/hello-world/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-10T10:00:00.000Z",
+        "lastUpdated": "2026-03-20T12:00:00.000Z",
+        "gitCommitSha": "aaa111"
+      }
+    ],
+    "multi-scope@other-market": [
+      {
+        "scope": "user",
+        "projectPath": "",
+        "installPath": "/srv/.claude/plugins/cache/other-market/multi-scope/0.2.0",
+        "version": "0.2.0",
+        "installedAt": "2026-03-11T10:00:00.000Z",
+        "lastUpdated": "2026-03-21T12:00:00.000Z",
+        "gitCommitSha": "bbb222"
+      },
+      {
+        "scope": "project",
+        "projectPath": "/srv/myproject",
+        "installPath": "/srv/.claude/plugins/cache/other-market/multi-scope/0.2.0",
+        "version": "0.2.0",
+        "installedAt": "2026-03-12T10:00:00.000Z",
+        "lastUpdated": "2026-03-22T12:00:00.000Z",
+        "gitCommitSha": "ccc333"
+      }
+    ]
+  }
+}
