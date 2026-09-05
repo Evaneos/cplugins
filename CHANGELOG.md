@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Evaneos/cplugins/compare/v0.1.1...v0.1.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* **ci:** note incompatibility with GitHub immutable releases ([94a114c](https://github.com/Evaneos/cplugins/commit/94a114c8a259ac0e04d46766e09e0ee8282351f7))
+
 ## [0.1.1](https://github.com/Evaneos/cplugins/compare/v0.1.0...v0.1.1) (2026-09-05)
 
 
