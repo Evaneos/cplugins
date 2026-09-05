@@ -41,6 +41,7 @@ e2e/
 - `release-please` (release-type `go`) runs on every push to `main`, maintaining a Release PR with `CHANGELOG.md` and the next version bump computed from commit history
 - Commits and PR titles must follow Conventional Commits (`feat:`, `fix:`, `chore:`, …) — release-please can't decide a bump or write the changelog otherwise
 - Merging the Release PR tags the release and creates the GitHub Release; a second job in the same workflow (`.github/workflows/release-please.yaml`), gated on `release_created`, then builds and attaches binaries via `goreleaser` (`.goreleaser.yaml`) — a tag-push-triggered workflow wouldn't fire here, since GitHub doesn't cascade a new run from a ref created by the workflow's own `GITHUB_TOKEN`
+- FYI: this release pipeline is incompatible with GitHub's "immutable releases" setting — keep it disabled
 
 ## Key conventions
 
