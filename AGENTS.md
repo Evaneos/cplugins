@@ -36,6 +36,12 @@ e2e/
 - `prune` — remove project-scope installs whose `projectPath` no longer exists, dropping the plugin's key entirely once none are left
 - `clean` — remove orphaned cache entries
 
+## Release process
+
+- `release-please` (release-type `go`) runs on every push to `main`, maintaining a Release PR with `CHANGELOG.md` and the next version bump computed from commit history
+- Commits and PR titles must follow Conventional Commits (`feat:`, `fix:`, `chore:`, …) — release-please can't decide a bump or write the changelog otherwise
+- Merging the Release PR tags the release and creates the GitHub Release; the tag push triggers `.github/workflows/release.yaml`, which builds and attaches binaries via `goreleaser` (`.goreleaser.yaml`)
+
 ## Key conventions
 
 - `dev` resolves symlinks at write time (`filepath.EvalSymlinks`) to store canonical paths; `undev` re-caches from the marketplace source
