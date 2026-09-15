@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/Evaneos/cplugins/compare/v0.1.2...v0.1.3) (2026-09-15)
+
+
+### Bug Fixes
+
+* inverser la convention AGENTS.md/CLAUDE.md ([#10](https://github.com/Evaneos/cplugins/issues/10)) ([946654d](https://github.com/Evaneos/cplugins/commit/946654dad91cb442dd0ab4c4157b496e9f5defe6))
+
 ## [0.1.2](https://github.com/Evaneos/cplugins/compare/v0.1.1...v0.1.2) (2026-09-05)
 
 
