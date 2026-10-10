@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/Evaneos/cplugins/internal/cache"
 	"github.com/Evaneos/cplugins/internal/claude"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +14,8 @@ var repairCmd = &cobra.Command{
 	Use:   "repair [plugin@marketplace]",
 	Short: "Recache broken plugins from their marketplace source",
 	Long: `Repair fixes plugins whose installPath no longer exists by re-copying them
-from the marketplace source directory into the cache.
+from the marketplace source directory into the cache, and points plugins
+recorded by dev back at their dev path when an update moved them to the cache.
 
 Without arguments, repairs all broken plugins. With a plugin key, repairs only that plugin.`,
 	Args:              cobra.MaximumNArgs(1),
@@ -47,8 +50,49 @@ func runRepair(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	devState := loadDevState(cmd.ErrOrStderr())
+	if len(args) == 0 {
+		for _, key := range devState.keys() {
+			if _, ok := plugins[key]; !ok {
+				if err := devState.forget(key); err != nil {
+					fmt.Fprintf(cmd.ErrOrStderr(), "⚠ %s: %v\n", key, err)
+				}
+			}
+		}
+	}
+
 	repaired := 0
 	for _, p := range targets {
+		current := devModePath(cacheBaseDir(), p.Installs)
+		devPath := devState.path(p.Key)
+
+		// The active dev path wins over the record.
+		if current != "" && current != devPath && isPluginDir(current) {
+			if err := devState.record(p.Key, current); err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "⚠ %s: recording dev mode: %v\n", p.Key, err)
+			}
+			devPath = current
+		}
+
+		if devPath != "" && !isPluginDir(devPath) {
+			if err := devState.forget(p.Key); err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "⚠ %s: %v\n", p.Key, err)
+			}
+			devPath = ""
+		}
+
+		if devPath != "" && hasCachedInstall(p) {
+			if err := claude.PatchInstallPaths(installedPluginsPath(), p.Key, func(_, _ string) string {
+				return devPath
+			}); err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "⚠ %s: %v\n", p.Key, err)
+				continue
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "↺ %s → %s (dev mode restored after an update)\n", p.Key, devPath)
+			repaired++
+			continue
+		}
+
 		if !isBroken(p) {
 			continue
 		}
@@ -79,6 +123,20 @@ func isBroken(p *claude.Plugin) bool {
 		}
 	}
 	return false
+}
+
+func hasCachedInstall(p *claude.Plugin) bool {
+	for _, inst := range p.Installs {
+		if cache.IsUnderCache(cacheBaseDir(), inst.InstallPath) {
+			return true
+		}
+	}
+	return false
+}
+
+func isPluginDir(path string) bool {
+	_, err := os.Stat(filepath.Join(path, ".claude-plugin", "plugin.json"))
+	return err == nil
 }
 
 func completeBrokenPlugins(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {

@@ -31,6 +31,10 @@ func runUndev(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("plugin %q not found in installed_plugins.json", key)
 	}
 
+	// Forgotten first: a record left behind would make repair undo the undev.
+	if err := loadDevState(cmd.ErrOrStderr()).forget(key); err != nil {
+		return fmt.Errorf("forgetting dev mode: %w", err)
+	}
 	if devModePath(cacheBaseDir(), plugin.Installs) == "" {
 		return fmt.Errorf("plugin %q is not in dev mode", key)
 	}
