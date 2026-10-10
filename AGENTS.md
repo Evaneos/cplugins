@@ -30,7 +30,7 @@ e2e/
 - `dev <plugin@marketplace> <path>` — patch `installPath` to a local source dir
 - `undev <plugin@marketplace>` — re-cache the plugin from its marketplace source and point `installPath` back at the cache
 - `status [plugin@marketplace]` (aliases `ls`, `list`) — list plugins and their health; user-scope always visible, project-scope filtered by CWD
-- `repair [plugin@marketplace]` — re-cache plugins whose `installPath` no longer exists
+- `repair [plugin@marketplace]` — re-cache plugins whose `installPath` no longer exists; re-point plugins recorded by `dev` at their dev path when Claude Code's auto-update moved them back to the cache
 - `prune` — remove project-scope installs whose `projectPath` no longer exists, dropping the plugin's key entirely once none are left
 - `clean` — remove orphaned cache entries
 
@@ -44,6 +44,7 @@ e2e/
 ## Key conventions
 
 - `dev` resolves symlinks at write time (`filepath.EvalSymlinks`) to store canonical paths; `undev` re-caches from the marketplace source
+- Dev mode is recorded in `<claudeDir>/cplugins/dev.json` (`cmd/devstate.go`): `dev` writes the entry, `repair` records dev-mode plugins it finds unrecorded, `undev` and `repair` drop it when the plugin leaves dev mode or its dev path disappears
 - `installed_plugins.json` installPath patches are via `claude.PatchInstallPaths`/`claude.PatchInstalls`; install removal is via `claude.RemoveInstalls`
 - Never modify `known_marketplaces.json` — delegate to `claude plugin marketplace add/remove`
 - `claude-plugins-official` plugins are always skipped (managed by Claude Code)

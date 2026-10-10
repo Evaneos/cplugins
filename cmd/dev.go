@@ -45,9 +45,14 @@ func runDev(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("no plugin.json at %s — is this a valid plugin directory?", pluginJSON)
 	}
 
+	state := loadDevState(cmd.ErrOrStderr())
+	if err := state.record(key, devPath); err != nil {
+		return fmt.Errorf("recording dev mode: %w", err)
+	}
 	if err := claude.PatchInstallPaths(installedPluginsPath(), key, func(_, _ string) string {
 		return devPath
 	}); err != nil {
+		_ = state.forget(key)
 		return fmt.Errorf("patching installPath: %w", err)
 	}
 

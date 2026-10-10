@@ -171,10 +171,7 @@ func readRegistry(path string) (*orderedObject, error) {
 	return root, nil
 }
 
-// writeRegistry serializes root back to path, atomically: it writes to a
-// temporary file in the same directory and renames it into place, so a
-// concurrent reader never observes a partial write. The temporary file is
-// removed if any step fails.
+// writeRegistry serializes root back to path atomically.
 func writeRegistry(path string, root *orderedObject) error {
 	raw, err := root.MarshalJSON()
 	if err != nil {
@@ -184,13 +181,20 @@ func writeRegistry(path string, root *orderedObject) error {
 	if err := json.Indent(&pretty, raw, "", "  "); err != nil {
 		return fmt.Errorf("formatting installed plugins: %w", err)
 	}
+	return WriteFileAtomic(path, pretty.Bytes())
+}
 
+// WriteFileAtomic writes data to path through a temporary file renamed into
+// place, keeping path's permissions when it exists, so a concurrent reader
+// never observes a partial write. The temporary file is removed if any step
+// fails.
+func WriteFileAtomic(path string, data []byte) error {
 	mode := os.FileMode(0o644)
 	if info, err := os.Stat(path); err == nil {
 		mode = info.Mode().Perm()
 	}
 
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".installed_plugins-*.tmp")
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+"-*.tmp")
 	if err != nil {
 		return fmt.Errorf("creating temp file: %w", err)
 	}
@@ -206,7 +210,7 @@ func writeRegistry(path string, root *orderedObject) error {
 		_ = tmp.Close()
 		return fmt.Errorf("setting temp file permissions: %w", err)
 	}
-	if _, err := tmp.Write(pretty.Bytes()); err != nil {
+	if _, err := tmp.Write(data); err != nil {
 		_ = tmp.Close()
 		return fmt.Errorf("writing temp file: %w", err)
 	}
