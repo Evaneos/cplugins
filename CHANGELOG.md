@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/Evaneos/cplugins/compare/v0.1.2...v0.2.0) (2026-10-10)
+
+
+### Features
+
+* restore dev mode after a marketplace auto-update ([#14](https://github.com/Evaneos/cplugins/issues/14)) ([ec16229](https://github.com/Evaneos/cplugins/commit/ec1622959d8323e023eb3004839127947662597f))
+
+
+### Bug Fixes
+
+* inverser la convention AGENTS.md/CLAUDE.md ([#10](https://github.com/Evaneos/cplugins/issues/10)) ([946654d](https://github.com/Evaneos/cplugins/commit/946654dad91cb442dd0ab4c4157b496e9f5defe6))
+
 ## [0.1.2](https://github.com/Evaneos/cplugins/compare/v0.1.1...v0.1.2) (2026-09-05)
 
 
