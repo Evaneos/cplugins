@@ -16,6 +16,8 @@ var repairCmd = &cobra.Command{
 	Long: `Repair fixes plugins whose installPath no longer exists by re-copying them
 from the marketplace source directory into the cache, and points plugins
 recorded by dev back at their dev path when an update moved them to the cache.
+It also removes an empty projectPath from user-scope installs, so that
+'claude plugin uninstall' finds them.
 
 Without arguments, repairs all broken plugins. With a plugin key, repairs only that plugin.`,
 	Args:              cobra.MaximumNArgs(1),
@@ -63,6 +65,16 @@ func runRepair(cmd *cobra.Command, args []string) error {
 
 	repaired := 0
 	for _, p := range targets {
+		if p.Marketplace != claude.OfficialMarketplace {
+			dropped, err := claude.DropEmptyUserProjectPaths(installedPluginsPath(), p.Key)
+			if err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "⚠ %s: %v\n", p.Key, err)
+			} else if dropped {
+				fmt.Fprintf(cmd.OutOrStdout(), "✓ %s: empty projectPath removed from user install\n", p.Key)
+				repaired++
+			}
+		}
+
 		current := devModePath(cacheBaseDir(), p.Installs)
 		devPath := devState.path(p.Key)
 

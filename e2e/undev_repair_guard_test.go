@@ -21,7 +21,7 @@ func TestUndev_unsupportedSourceType_refuses(t *testing.T) {
 
 	devSource := newPluginSource(t, "hello", "0.1.0")
 	addInstallEntry(t, home, key, map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": devSource, "version": "0.1.0",
 	})
 
@@ -50,7 +50,7 @@ func TestRepair_unsupportedSourceType_refuses(t *testing.T) {
 
 	brokenPath := filepath.Join(home, ".claude", "plugins", "cache", mpName, "hello", "0.1.0")
 	addInstallEntry(t, home, key, map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": brokenPath, "version": "0.1.0",
 	})
 

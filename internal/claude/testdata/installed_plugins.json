@@ -4,7 +4,6 @@
     "hello-world@my-marketplace": [
       {
         "scope": "user",
-        "projectPath": "",
         "installPath": "/srv/.claude/plugins/cache/my-marketplace/hello-world/1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-03-10T10:00:00.000Z",
@@ -15,7 +14,6 @@
     "multi-scope@other-market": [
       {
         "scope": "user",
-        "projectPath": "",
         "installPath": "/srv/.claude/plugins/cache/other-market/multi-scope/0.2.0",
         "version": "0.2.0",
         "installedAt": "2026-03-11T10:00:00.000Z",

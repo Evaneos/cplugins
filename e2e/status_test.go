@@ -119,7 +119,6 @@ func TestStatus_duplicateInstall(t *testing.T) {
 	// Inject a second entry with the SAME "user" scope → real dup
 	addInstallEntry(t, home, "hello@test-mp", map[string]any{
 		"scope":       "user",
-		"projectPath": "",
 		"installPath": cacheVersionDir(home, "test-mp", "hello", "0.1.0"),
 		"version":     "0.1.0",
 	})
@@ -373,7 +372,7 @@ func TestStatus_gitMarketplace_ok(t *testing.T) {
 	cachePath := cacheVersionDir(home, "github-mp", "hello", "1.0.0")
 	writePluginJSON(t, cachePath, "hello", "1.0.0")
 	addInstallEntry(t, home, "hello@github-mp", map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": cachePath, "version": "1.0.0",
 	})
 
@@ -392,7 +391,7 @@ func TestStatus_gitMarketplace_broken(t *testing.T) {
 	// No cache: writePluginJSON is not called
 	cachePath := cacheVersionDir(home, "github-mp", "hello", "1.0.0")
 	addInstallEntry(t, home, "hello@github-mp", map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": cachePath, "version": "1.0.0",
 	})
 
@@ -473,7 +472,7 @@ func TestStatus_gitMarketplace_dev(t *testing.T) {
 	cachePath := cacheVersionDir(home, "github-mp", "hello", "1.0.0")
 	writePluginJSON(t, cachePath, "hello", "1.0.0")
 	addInstallEntry(t, home, "hello@github-mp", map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": cachePath, "version": "1.0.0",
 	})
 
@@ -537,7 +536,7 @@ func TestStatus_urlMarketplace_ok(t *testing.T) {
 	cachePath := cacheVersionDir(home, "url-mp", "hello", "2.0.0")
 	writePluginJSON(t, cachePath, "hello", "2.0.0")
 	addInstallEntry(t, home, "hello@url-mp", map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": cachePath, "version": "2.0.0",
 	})
 

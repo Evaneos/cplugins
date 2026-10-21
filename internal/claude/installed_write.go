@@ -3,6 +3,7 @@ package claude
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -370,4 +371,44 @@ func RemoveInstalls(path, key string, pred func(Install) bool) (int, error) {
 		return 0, err
 	}
 	return removed, nil
+}
+
+// errUnchanged aborts withPluginsRegistry without rewriting the file.
+var errUnchanged = errors.New("unchanged")
+
+// DropEmptyUserProjectPaths removes `"projectPath": ""` from a plugin's
+// user-scope installs and reports whether any was removed. Claude Code
+// 2.1.306's `claude plugin uninstall` only finds a user install without the key.
+func DropEmptyUserProjectPaths(path, key string) (bool, error) {
+	err := withPluginsRegistry(path, func(plugins *orderedObject) error {
+		raw, ok := plugins.get(key)
+		if !ok {
+			return fmt.Errorf("plugin %q not found", key)
+		}
+		entries, err := decodeEntries(raw)
+		if err != nil {
+			return fmt.Errorf("parsing installed plugins: %w", err)
+		}
+		changed := false
+		for _, entry := range entries {
+			_, has := entry.get("projectPath")
+			if has && stringField(entry, "scope") == ScopeUser && stringField(entry, "projectPath") == "" {
+				entry.delete("projectPath")
+				changed = true
+			}
+		}
+		if !changed {
+			return errUnchanged
+		}
+		newRaw, err := encodeEntries(entries)
+		if err != nil {
+			return fmt.Errorf("marshaling installed plugins: %w", err)
+		}
+		plugins.set(key, newRaw)
+		return nil
+	})
+	if errors.Is(err, errUnchanged) {
+		return false, nil
+	}
+	return err == nil, err
 }

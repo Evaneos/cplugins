@@ -68,7 +68,7 @@ func TestStatus_newSourceTypes_noCrashNoFalseHealth(t *testing.T) {
 		installPath := cacheVersionDir(home, c.mp, c.key, "1.0.0")
 		writePluginJSON(t, installPath, c.key, "1.0.0")
 		addInstallEntry(t, home, c.key+"@"+c.mp, map[string]any{
-			"scope": "user", "projectPath": "",
+			"scope":       "user",
 			"installPath": installPath, "version": "1.0.0",
 		})
 	}
