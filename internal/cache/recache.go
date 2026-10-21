@@ -77,10 +77,20 @@ func copyDir(src, dst string) error {
 			_ = os.Remove(dstPath)
 			return os.Symlink(target, dstPath)
 		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(dstPath, data, 0o644)
+		// A read-only file left by a previous copy would make WriteFile fail.
+		_ = os.Remove(dstPath)
+		if err := os.WriteFile(dstPath, data, info.Mode().Perm()); err != nil {
+			return err
+		}
+		// WriteFile's mode goes through the umask.
+		return os.Chmod(dstPath, info.Mode().Perm())
 	})
 }
