@@ -166,7 +166,6 @@ func TestPrune_userScopeBrokenInstallPath_notRemoved(t *testing.T) {
 	removeInstalledPlugin(t, home, "hello@test-mp")
 	addInstallEntry(t, home, "hello@test-mp", map[string]any{
 		"scope":       "user",
-		"projectPath": "",
 		"installPath": "/nonexistent/user/install/path",
 		"version":     "0.1.0",
 	})

@@ -219,7 +219,7 @@ func TestRepair_gitMarketplace(t *testing.T) {
 
 	cachePath := cacheVersionDir(home, "github-mp", "hello", "1.0.0")
 	addInstallEntry(t, home, "hello@github-mp", map[string]any{
-		"scope": "user", "projectPath": "",
+		"scope":       "user",
 		"installPath": cachePath, "version": "1.0.0",
 	})
 

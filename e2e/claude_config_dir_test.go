@@ -30,7 +30,7 @@ func TestClaudeConfigDir_overridesRegistry(t *testing.T) {
 		"version": 2,
 		"plugins": map[string]any{
 			"hello@alt-mp": []map[string]any{
-				{"scope": "user", "projectPath": "", "installPath": installDir, "version": "0.1.0"},
+				{"scope": "user", "installPath": installDir, "version": "0.1.0"},
 			},
 		},
 	})
