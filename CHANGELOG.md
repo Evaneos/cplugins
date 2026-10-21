@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/Evaneos/cplugins/compare/v0.2.0...v0.2.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* recache preserves file modes ([#16](https://github.com/Evaneos/cplugins/issues/16)) ([3ee00a1](https://github.com/Evaneos/cplugins/commit/3ee00a18699a29c2d83afb5bc69ccf794953afaf))
+* repair drops an empty projectPath from user-scope installs ([#15](https://github.com/Evaneos/cplugins/issues/15)) ([5ef21c0](https://github.com/Evaneos/cplugins/commit/5ef21c0500eacc87d24e781251547ab9e7999c44))
+
 ## [0.2.0](https://github.com/Evaneos/cplugins/compare/v0.1.2...v0.2.0) (2026-10-10)
 
 
