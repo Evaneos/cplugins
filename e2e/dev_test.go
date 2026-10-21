@@ -139,6 +139,31 @@ func TestUndev_basic(t *testing.T) {
 	}
 }
 
+func TestUndev_preservesExecutableBit(t *testing.T) {
+	home := setupHome(t)
+	mpDir := newMarketplace(t, home, "test-mp", []pluginSpec{{"hello", "0.1.0"}})
+	script := filepath.Join(mpDir, "plugins", "hello", "scripts", "run.sh")
+	if err := os.MkdirAll(filepath.Dir(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(script, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	installPlugin(t, home, "hello@test-mp")
+	src := newPluginSource(t, "hello", "0.1.0")
+
+	mustCplugins(t, home, "dev", "hello@test-mp", src)
+	mustCplugins(t, home, "undev", "hello@test-mp")
+
+	fi, err := os.Stat(filepath.Join(installPath(t, home, "hello@test-mp"), "scripts", "run.sh"))
+	if err != nil {
+		t.Fatalf("script missing from the recached plugin: %v", err)
+	}
+	if fi.Mode().Perm()&0o111 == 0 {
+		t.Errorf("script mode = %v, want executable", fi.Mode().Perm())
+	}
+}
+
 func TestUndev_notInDevMode(t *testing.T) {
 	home := setupHome(t)
 	newMarketplace(t, home, "test-mp", []pluginSpec{{"hello", "0.1.0"}})
