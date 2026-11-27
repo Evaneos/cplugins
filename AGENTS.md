@@ -18,7 +18,7 @@ CI runs build, vet, gofmt, lint, `govulncheck` and the tests, minus the `e2e` pa
 ```
 cmd/           # cobra commands (root, dev, undev, status, prune, clean, helpers)
 internal/
-  claude/      # parsers for installed_plugins.json, known_marketplaces.json, plugin.json; PatchInstallPaths/PatchInstalls/RemoveInstalls writers
+  claude/      # parsers for installed_plugins.json, known_marketplaces.json, plugin.json, a marketplace's marketplace.json (PluginSourceDir); PatchInstallPaths/PatchInstalls/RemoveInstalls writers
   cache/       # orphan detection, entry removal, recache from marketplace source
 e2e/
   claude-home/ # template HOME for E2E tests (credentials gitignored)

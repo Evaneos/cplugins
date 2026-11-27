@@ -155,8 +155,11 @@ func recacheFromMarketplace(p *claude.Plugin, marketplaces map[string]*claude.Ma
 		return "", "", fmt.Errorf("plugin %q comes from a %q marketplace; cplugins can't recache it — run `claude plugin install %s` or `claude plugin update %s` instead", p.Key, mp.SourceType, p.Key, p.Key)
 	}
 
-	pluginsDir := filepath.Join(mp.LocalRoot(), "plugins")
-	cachePath, version, err = cache.RecachePlugin(pluginsDir, p.Name, cacheBaseDir(), p.Marketplace)
+	pluginDir, err := claude.PluginSourceDir(mp.LocalRoot(), p.Name)
+	if err != nil {
+		return "", "", fmt.Errorf("recaching %s: %w", p.Key, err)
+	}
+	cachePath, version, err = cache.RecachePlugin(pluginDir, p.Name, cacheBaseDir(), p.Marketplace)
 	if err != nil {
 		return "", "", fmt.Errorf("recaching %s: %w", p.Key, err)
 	}

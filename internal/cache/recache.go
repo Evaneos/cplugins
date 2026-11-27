@@ -9,15 +9,15 @@ import (
 	"github.com/Evaneos/cplugins/internal/claude"
 )
 
-// RecachePlugin copies a plugin from its marketplace source into the cache directory.
-// pluginsDir is the "plugins" subdirectory of the marketplace source (e.g., /path/to/mp/plugins).
-// Returns the cache path and the version read from plugin.json.
+// RecachePlugin copies a plugin from its source directory in the marketplace
+// tree into the cache directory. Returns the cache path and the version read
+// from plugin.json.
 //
-// The plugin entry inside pluginsDir may be a symlink to the real plugin directory,
-// which is a common pattern for marketplaces that aggregate per-repo plugins.
-// EvalSymlinks resolves it so the recursive copy walks into the target.
-func RecachePlugin(pluginsDir, pluginName, cacheDir, marketplaceName string) (cachePath, version string, err error) {
-	srcDir, err := filepath.EvalSymlinks(filepath.Join(pluginsDir, pluginName))
+// pluginDir may be a symlink to the real plugin directory, a common pattern for
+// marketplaces that aggregate per-repo plugins. EvalSymlinks resolves it so the
+// recursive copy walks into the target.
+func RecachePlugin(pluginDir, pluginName, cacheDir, marketplaceName string) (cachePath, version string, err error) {
+	srcDir, err := filepath.EvalSymlinks(pluginDir)
 	if err != nil {
 		return "", "", fmt.Errorf("resolving source for %s: %w", pluginName, err)
 	}
@@ -28,6 +28,9 @@ func RecachePlugin(pluginsDir, pluginName, cacheDir, marketplaceName string) (ca
 	}
 
 	cachePath = filepath.Join(cacheDir, marketplaceName, pluginName, version)
+	if rel, err := filepath.Rel(srcDir, canonicalPath(cachePath)); err == nil && filepath.IsLocal(rel) {
+		return "", "", fmt.Errorf("cache directory %s lies inside the source of %s", cachePath, pluginName)
+	}
 
 	if err := os.RemoveAll(cachePath); err != nil {
 		return "", "", fmt.Errorf("clearing the cache directory for %s: %w", pluginName, err)
@@ -37,6 +40,19 @@ func RecachePlugin(pluginsDir, pluginName, cacheDir, marketplaceName string) (ca
 	}
 
 	return cachePath, version, nil
+}
+
+// canonicalPath resolves symlinks in path, which may not exist yet, through
+// its deepest existing ancestor.
+func canonicalPath(path string) string {
+	if resolved, err := filepath.EvalSymlinks(path); err == nil {
+		return resolved
+	}
+	parent := filepath.Dir(path)
+	if parent == path {
+		return path
+	}
+	return filepath.Join(canonicalPath(parent), filepath.Base(path))
 }
 
 // copySkipDirs: rebuildable development artifact directories, never useful in

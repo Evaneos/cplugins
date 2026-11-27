@@ -44,35 +44,17 @@ type pluginSpec struct {
 func newMarketplace(t *testing.T, home, mpName string, plugins []pluginSpec) string {
 	t.Helper()
 	mpDir := t.TempDir()
-
-	pluginEntries := make([]map[string]any, len(plugins))
-	for i, p := range plugins {
-		pluginEntries[i] = map[string]any{
-			"name":        p.name,
-			"source":      "./plugins/" + p.name,
-			"description": "test plugin " + p.name,
-			"version":     p.version,
-			"author":      map[string]any{"name": "test"},
-			"tags":        []string{},
-		}
-	}
-	writeJSON(t, filepath.Join(mpDir, ".claude-plugin", "marketplace.json"), map[string]any{
-		"name":    mpName,
-		"owner":   map[string]any{"name": "test"},
-		"plugins": pluginEntries,
-	})
-	for _, p := range plugins {
-		writePluginJSON(t, filepath.Join(mpDir, "plugins", p.name), p.name, p.version)
-	}
+	writeMarketplaceTree(t, mpDir, mpName, plugins)
 	mustClaudeOK(t, home, "plugin", "marketplace", "add", mpDir)
 	return mpDir
 }
 
 // injectGitMarketplace injects a git marketplace into known_marketplaces.json
 // and materializes the local clone under installLocation. sourceType is "github"
-// or "url". repoOrURL is the repo slug or the full URL. If plugins is non-empty,
-// it writes a plugin.json for each entry under <installLocation>/plugins/<name>/
-// (mimicking the clone that Claude Code maintains for this marketplace type).
+// or "url". repoOrURL is the repo slug or the full URL. It writes the clone's
+// marketplace.json and a plugin.json for each of plugins under
+// <installLocation>/plugins/<name>/ (mimicking the clone that Claude Code
+// maintains for this marketplace type).
 // Returns the local clone path.
 func injectGitMarketplace(t *testing.T, home, mpName, sourceType, repoOrURL string, plugins []pluginSpec) string {
 	t.Helper()
@@ -94,10 +76,33 @@ func injectGitMarketplace(t *testing.T, home, mpName, sourceType, repoOrURL stri
 	}
 	writeJSON(t, path, mps)
 
-	for _, p := range plugins {
-		writePluginJSON(t, filepath.Join(cloneDir, "plugins", p.name), p.name, p.version)
-	}
+	writeMarketplaceTree(t, cloneDir, mpName, plugins)
 	return cloneDir
+}
+
+// writeMarketplaceTree writes, under dir, a marketplace.json listing plugins
+// and a plugin.json for each one under plugins/<name>/.
+func writeMarketplaceTree(t *testing.T, dir, mpName string, plugins []pluginSpec) {
+	t.Helper()
+	pluginEntries := make([]map[string]any, len(plugins))
+	for i, p := range plugins {
+		pluginEntries[i] = map[string]any{
+			"name":        p.name,
+			"source":      "./plugins/" + p.name,
+			"description": "test plugin " + p.name,
+			"version":     p.version,
+			"author":      map[string]any{"name": "test"},
+			"tags":        []string{},
+		}
+	}
+	writeJSON(t, filepath.Join(dir, ".claude-plugin", "marketplace.json"), map[string]any{
+		"name":    mpName,
+		"owner":   map[string]any{"name": "test"},
+		"plugins": pluginEntries,
+	})
+	for _, p := range plugins {
+		writePluginJSON(t, filepath.Join(dir, "plugins", p.name), p.name, p.version)
+	}
 }
 
 // newPluginSource creates a standalone plugin source directory for dev mode.

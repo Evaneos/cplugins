@@ -62,7 +62,7 @@ func TestStatus_newSourceTypes_noCrashNoFalseHealth(t *testing.T) {
 
 	for _, c := range cases {
 		installLocation := filepath.Join(home, ".claude", "plugins", "cache", c.mp)
-		writePluginJSON(t, filepath.Join(installLocation, "plugins", c.key), c.key, "1.0.0")
+		writeMarketplaceTree(t, installLocation, c.mp, []pluginSpec{{c.key, "1.0.0"}})
 		injectMarketplace(t, home, c.mp, c.source, installLocation, false)
 
 		installPath := cacheVersionDir(home, c.mp, c.key, "1.0.0")

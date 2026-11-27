@@ -52,7 +52,7 @@ func (m *Marketplace) SupportsSourceVersion() bool {
 }
 
 // LocalRoot returns the local filesystem path containing the marketplace
-// tree (with its plugins/ subdirectory). For directory sources it is the
+// tree (with its .claude-plugin/marketplace.json). For directory sources it is the
 // source path; for github/url sources it is the local clone maintained by
 // Claude Code under ~/.claude/plugins/marketplaces/<name>/.
 func (m *Marketplace) LocalRoot() string {
