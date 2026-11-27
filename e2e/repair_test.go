@@ -247,3 +247,69 @@ func TestRepair_afterUndev(t *testing.T) {
 	newIP := installPath(t, home, "hello@test-mp")
 	assertUnderCache(t, home, newIP)
 }
+
+// newRootPluginMarketplace creates a repository that is its own marketplace:
+// the plugin sits at the repository root, declared with "source": "./".
+func newRootPluginMarketplace(t *testing.T, home, mpName, pluginName, version string) string {
+	t.Helper()
+	mpDir := t.TempDir()
+	writeJSON(t, filepath.Join(mpDir, ".claude-plugin", "marketplace.json"), map[string]any{
+		"name":    mpName,
+		"owner":   map[string]any{"name": "test"},
+		"plugins": []map[string]any{{"name": pluginName, "source": "./"}},
+	})
+	writePluginJSON(t, mpDir, pluginName, version)
+	mustClaudeOK(t, home, "plugin", "marketplace", "add", mpDir)
+	return mpDir
+}
+
+func TestRepair_pluginAtMarketplaceRoot(t *testing.T) {
+	home := setupHome(t)
+	newRootPluginMarketplace(t, home, "root-mp", "hello", "0.1.0")
+	installPlugin(t, home, "hello@root-mp")
+
+	ip := installPath(t, home, "hello@root-mp")
+	os.RemoveAll(ip)
+
+	out := mustCplugins(t, home, "repair")
+	assertContains(t, out, "hello@root-mp")
+	assertContains(t, out, "→")
+
+	if _, err := os.Stat(filepath.Join(ip, ".claude-plugin", "plugin.json")); err != nil {
+		t.Errorf("plugin.json missing after repair: %v", err)
+	}
+}
+
+func TestStatus_staleAtMarketplaceRoot(t *testing.T) {
+	home := setupHome(t)
+	mpDir := newRootPluginMarketplace(t, home, "root-mp", "hello", "0.1.0")
+	installPlugin(t, home, "hello@root-mp")
+
+	bumpPluginSourceVersion(t, mpDir, "0.2.0")
+
+	out := mustCplugins(t, home, "status")
+	assertContains(t, out, "stale")
+}
+
+func TestRepair_objectSourceRefused(t *testing.T) {
+	home := setupHome(t)
+	mpDir := newMarketplace(t, home, "test-mp", []pluginSpec{{"hello", "0.1.0"}})
+	installPlugin(t, home, "hello@test-mp")
+
+	writeJSON(t, filepath.Join(mpDir, ".claude-plugin", "marketplace.json"), map[string]any{
+		"name":  "test-mp",
+		"owner": map[string]any{"name": "test"},
+		"plugins": []map[string]any{{
+			"name":   "hello",
+			"source": map[string]any{"source": "github", "repo": "org/hello"},
+		}},
+	})
+	ip := installPath(t, home, "hello@test-mp")
+	os.RemoveAll(ip)
+
+	stdout, stderr, _ := runCplugins(t, home, "repair", "hello@test-mp")
+	assertContains(t, stdout+stderr, "claude plugin install")
+	if _, err := os.Stat(ip); !os.IsNotExist(err) {
+		t.Errorf("repair recreated %s from a marketplace that does not hold the plugin: %v", ip, err)
+	}
+}

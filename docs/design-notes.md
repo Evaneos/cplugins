@@ -42,14 +42,17 @@ JSON is the reference.
 
 ## A marketplace's local layout depends on its source type
 
-`LocalRoot()/plugins/<name>/` holds a plugin's source for `directory`, `github`, `url` and
-`git-subdir` marketplaces. For `npm`, `archive` and `command` sources — and for any type added after
-this was written — that layout does not apply, and `installLocation` does not point at a tree shaped
-like it.
+For `directory`, `github`, `url` and `git-subdir` marketplaces, `LocalRoot()` holds the marketplace
+tree, and each plugin's source sits where its entry in `.claude-plugin/marketplace.json` says: a
+relative path from that root (`./plugins/<name>`, `./<name>`, or `./` for a repository that is its own
+marketplace), or a bare name under `metadata.pluginRoot`. For `npm`, `archive`, `command` and any
+unrecognized source type, `installLocation` does not point at such a tree.
 
-Consequence: `Marketplace.SupportsSourceVersion()` gates every code path that joins `plugins/` onto
-`LocalRoot()`. Version resolution degrades to `SOURCE -`; `undev` and `repair` refuse outright rather
-than cache the wrong tree and repoint `installPath` at it.
+Consequence: `Marketplace.SupportsSourceVersion()` gates every code path that resolves a plugin source
+under `LocalRoot()`, and `claude.PluginSourceDir` is the only place that resolves it. An entry whose
+source is an object (`github`, `git-subdir`…) is resolved outside the marketplace tree. In both cases
+version resolution degrades to `SOURCE -`, and `undev` and `repair` refuse, since caching the wrong
+tree would repoint `installPath` at it.
 
 ## Project-scope installs accumulate one entry per working directory
 

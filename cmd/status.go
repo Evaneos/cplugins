@@ -247,7 +247,10 @@ func resolveHealth(p *claude.Plugin, inst *claude.Install, cacheDir string, mark
 		}
 	} else {
 		if mp, ok := marketplaces[p.Marketplace]; ok && mp.SupportsSourceVersion() {
-			pluginSourceDir := filepath.Join(mp.LocalRoot(), "plugins", p.Name)
+			pluginSourceDir, err := claude.PluginSourceDir(mp.LocalRoot(), p.Name)
+			if err != nil {
+				return
+			}
 			if sv, err := claude.ResolveSourceVersion(pluginSourceDir); err == nil {
 				sourceVersion = sv
 				if sv != inst.Version {

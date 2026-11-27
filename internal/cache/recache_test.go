@@ -27,7 +27,7 @@ func TestRecachePlugin(t *testing.T) {
 
 	cacheDir := t.TempDir()
 
-	cachePath, version, err := RecachePlugin(filepath.Join(mpDir, "plugins"), "hello", cacheDir, "test-mp")
+	cachePath, version, err := RecachePlugin(pluginSrc, "hello", cacheDir, "test-mp")
 	if err != nil {
 		t.Fatalf("RecachePlugin failed: %v", err)
 	}
@@ -53,9 +53,9 @@ func TestRecachePlugin_overwritesExisting(t *testing.T) {
 
 	cacheDir := t.TempDir()
 
-	RecachePlugin(filepath.Join(mpDir, "plugins"), "hello", cacheDir, "test-mp")
+	RecachePlugin(pluginSrc, "hello", cacheDir, "test-mp")
 	writePluginJSON(t, pluginSrc, "hello", "0.2.0")
-	cachePath, version, err := RecachePlugin(filepath.Join(mpDir, "plugins"), "hello", cacheDir, "test-mp")
+	cachePath, version, err := RecachePlugin(pluginSrc, "hello", cacheDir, "test-mp")
 	if err != nil {
 		t.Fatalf("RecachePlugin failed on overwrite: %v", err)
 	}
@@ -68,9 +68,22 @@ func TestRecachePlugin_overwritesExisting(t *testing.T) {
 	}
 }
 
+func TestRecachePlugin_cacheInsideSource(t *testing.T) {
+	src := t.TempDir()
+	writePluginJSON(t, src, "hello", "0.1.0")
+
+	_, _, err := RecachePlugin(src, "hello", filepath.Join(src, "cache"), "test-mp")
+	if err == nil {
+		t.Fatal("expected error when the cache lies inside the source")
+	}
+	if _, statErr := os.Stat(filepath.Join(src, "cache")); !os.IsNotExist(statErr) {
+		t.Errorf("cache directory created inside the source: %v", statErr)
+	}
+}
+
 func TestRecachePlugin_missingSource(t *testing.T) {
 	cacheDir := t.TempDir()
-	_, _, err := RecachePlugin("/nonexistent/plugins", "hello", cacheDir, "test-mp")
+	_, _, err := RecachePlugin("/nonexistent/plugins/hello", "hello", cacheDir, "test-mp")
 	if err == nil {
 		t.Error("expected error for missing source")
 	}
@@ -103,7 +116,7 @@ func TestRecachePlugin_symlinkedSource(t *testing.T) {
 	}
 
 	cacheDir := t.TempDir()
-	cachePath, version, err := RecachePlugin(pluginsDir, "hello", cacheDir, "test-mp")
+	cachePath, version, err := RecachePlugin(filepath.Join(pluginsDir, "hello"), "hello", cacheDir, "test-mp")
 	if err != nil {
 		t.Fatalf("RecachePlugin failed on symlinked source: %v", err)
 	}
