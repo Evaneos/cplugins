@@ -194,13 +194,24 @@ func visibleInstalls(installs []claude.Install, cwd string, allProjects bool) []
 	return out
 }
 
-// isAncestorOf returns true if ancestor is an ancestor of path (or equal to path).
+// isAncestorOf returns true if ancestor is an ancestor of path (or equal to
+// path), once both are resolved through symlinks: a projectPath and the cwd can
+// name the same directory through different links (macOS /var → /private/var).
 func isAncestorOf(ancestor, path string) bool {
 	if ancestor == "" {
 		return false
 	}
-	rel, err := filepath.Rel(ancestor, path)
-	return err == nil && !strings.HasPrefix(rel, "..")
+	rel, err := filepath.Rel(resolveSymlinks(ancestor), resolveSymlinks(path))
+	return err == nil && filepath.IsLocal(rel)
+}
+
+// resolveSymlinks returns path with its symlinks resolved, or path unchanged
+// when it cannot be resolved (it does not exist, for instance).
+func resolveSymlinks(path string) string {
+	if resolved, err := filepath.EvalSymlinks(path); err == nil {
+		return resolved
+	}
+	return path
 }
 
 // projectColumnMaxLen bounds the PROJECT column: a worktree name derived

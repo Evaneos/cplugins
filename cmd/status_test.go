@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/Evaneos/cplugins/internal/claude"
@@ -56,6 +58,7 @@ func TestIsAncestorOf(t *testing.T) {
 		{"/foo", "/fo", false},         // shorter path
 		{"", "/foo", false},            // empty ancestor
 		{"/foo/bar", "/foo", false},    // parent ≠ ancestor
+		{"/foo", "/foo/..bar", true},   // child whose name starts with ".."
 	}
 
 	for _, c := range cases {
@@ -63,5 +66,23 @@ func TestIsAncestorOf(t *testing.T) {
 		if got != c.want {
 			t.Errorf("isAncestorOf(%q, %q) = %v, want %v", c.ancestor, c.path, got, c.want)
 		}
+	}
+}
+
+func TestIsAncestorOf_throughSymlink(t *testing.T) {
+	real := filepath.Join(t.TempDir(), "project")
+	if err := os.MkdirAll(filepath.Join(real, "sub"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(t.TempDir(), "link")
+	if err := os.Symlink(real, link); err != nil {
+		t.Fatal(err)
+	}
+
+	if !isAncestorOf(real, filepath.Join(link, "sub")) {
+		t.Error("physical project path should contain a cwd reached through a symlink")
+	}
+	if !isAncestorOf(link, filepath.Join(real, "sub")) {
+		t.Error("project path through a symlink should contain the physical cwd")
 	}
 }
